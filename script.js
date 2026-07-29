@@ -9,10 +9,10 @@
   let level = 1;
   let exp = 0;
   let expNext = 100;
-  
+
   // Base stats (tanpa bonus gelar)
   let baseStats = { str: 10, def: 10, spd: 10, agi: 10, luk: 10 };
-  
+
   // Data gelar
   const titleData = {
     Visitor: {
@@ -63,8 +63,8 @@
   };
 
   // State gelar
-  let purchasedTitles = []; // daftar gelar yang sudah dibeli
-  let currentTitle = null;  // gelar yang sedang aktif (null = tidak ada)
+  let purchasedTitles = [];
+  let currentTitle = null; // null = tidak ada gelar aktif
 
   // Elemen DOM
   const chatArea = document.getElementById('chatArea');
@@ -107,7 +107,6 @@
     expDisplay.textContent = exp;
     expNextDisplay.textContent = expNext;
 
-    // Tampilkan gelar jika ada
     if (currentTitle) {
       titleBar.classList.remove('hidden');
       titleBar.textContent = currentTitle;
@@ -300,16 +299,19 @@
     return false;
   }
 
-  // ========== FUNGSI BELI GELAR ==========
+  // ========== FUNGSI BELI GELAR (DIPERBAIKI) ==========
   function buyTitle(titleName) {
     const data = titleData[titleName];
-    if (!data) return;
+    if (!data) {
+      appendMessage(`❌ Gelar tidak valid.`, 'narrator');
+      return;
+    }
 
     // Jika gelar sudah dibeli, cukup aktifkan (tanpa biaya)
     if (purchasedTitles.includes(titleName)) {
       currentTitle = titleName;
       updateUI();
-      appendMessage(`🏅 Gelar diubah menjadi: ${titleName}`);
+      appendMessage(`🏅 Gelar diubah menjadi: ${titleName}`, 'narrator');
       titleShopModal.classList.remove('active');
       overlay.classList.remove('active');
       return;
@@ -326,26 +328,27 @@
     purchasedTitles.push(titleName);
     currentTitle = titleName;
 
-    // Berikan bonus Coin & Gems
+    // --- BERIKAN BONUS ---
+    // Bonus Coin
     if (data.coinBonus > 0) {
       coin += data.coinBonus;
       appendMessage(`🪙 Mendapat bonus ${data.coinBonus} Koin!`, 'narrator');
     }
+    // Bonus Gems
     if (data.gemBonus > 0) {
       gems += data.gemBonus;
       appendMessage(`💎 Mendapat bonus ${data.gemBonus} Gems!`, 'narrator');
     }
-
-    // Berikan artefak (jika ada)
+    // Bonus Artefak (minimal Rare)
     if (data.artifact) {
       appendMessage(`🎁 Mendapatkan artefak: **${data.artifact}** [${data.artifactGrade}]`, 'narrator');
     }
-
-    // Berikan hewan kuno (jika ada)
+    // Bonus Hewan Kuno (khusus Sage)
     if (data.beast) {
       appendMessage(`🐉 Mendapatkan hewan kuno: ${data.beast}`, 'narrator');
     }
 
+    // Bonus Stat akan otomatis terpakai karena currentTitle sudah diubah
     appendMessage(`🏅 Gelar **${titleName}** berhasil diperoleh!`, 'narrator');
     updateUI();
 
