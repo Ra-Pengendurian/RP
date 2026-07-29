@@ -1,4 +1,3 @@
-// script.js
 (function(){
   // ========== DATA ==========
   const naratorName = 'Caine';
@@ -41,10 +40,10 @@
     
     // Tampilkan gelar hanya jika ada
     if (title && title !== '') {
-      titleBar.style.display = 'block';
+      titleBar.classList.remove('hidden');
       titleBar.textContent = title;
     } else {
-      titleBar.style.display = 'none';
+      titleBar.classList.add('hidden');
     }
     
     document.getElementById('statStr').textContent = stats.str;
