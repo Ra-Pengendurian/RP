@@ -1,261 +1,277 @@
-// script.js
-(function(){
-  // ========== DATA ==========
-  const naratorName = 'Caine';
-  let coin = 100;
-  let gachaRemaining = 10;    // 10 roll gratis
-  let playerRole = 'Manusia'; // default
-  let rollCount = 0;
-
-  // elemen
-  const chatArea = document.getElementById('chatArea');
-  const coinDisplay = document.getElementById('coinDisplay');
-  const chatInput = document.getElementById('chatInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const menuDots = document.getElementById('menuDots');
-  const npcModal = document.getElementById('npcModal');
-  const overlay = document.getElementById('overlay');
-
-  // helper: update coin UI
-  function updateCoinUI() {
-    coinDisplay.textContent = coin;
-  }
-
-  // helper: append message
-  function appendMessage(text, sender = 'narrator', extra = '') {
-    const div = document.createElement('div');
-    div.className = `message ${sender}`;
-    if (sender === 'narrator') {
-      div.innerHTML = `<div class="msg-sender">📖 ${naratorName}</div>${text}`;
-    } else if (sender === 'player') {
-      div.innerHTML = `<div class="msg-sender player-name">🧑 Pemain</div>${text}`;
-    } else {
-      div.textContent = text;
-    }
-    if (extra) {
-      const small = document.createElement('small');
-      small.textContent = extra;
-      div.appendChild(small);
-    }
-    chatArea.appendChild(div);
-    chatArea.scrollTop = chatArea.scrollHeight;
-  }
-
-  // narator sambutan awal
-  function welcomeMessage() {
-    appendMessage(`Selamat datang, Pemain! Aku ${naratorName}, pemandu mu di dunia Fantasi. 🏰`, 'narrator');
-    appendMessage(`Kamu memiliki 10 kali gulungan peran GRATIS! Gunakan /gacha untuk memulai.`, 'narrator');
-    appendMessage(`Ketik /jobdesk untuk melihat daftar pekerjaan.`, 'narrator');
-    appendMessage(`Ketik /npc untuk berinteraksi dengan pedagang.`, 'narrator');
-    appendMessage(`Koin awal: 100 🪙. Gunakan dengan bijak.`, 'narrator');
-  }
-
-  // ========== GACHA ==========
-  function rollGacha() {
-    if (gachaRemaining <= 0) {
-      appendMessage(`⚠️ Gulungan gratis habis. Gunakan /buygacha untuk membeli (100 koin per roll).`, 'narrator');
-      return;
-    }
-    // random number generator
-    const rand = Math.random() * 100; // 0-100
-    let role = 'Manusia';
-    let percent = 0;
-    if (rand <= 90) { role = 'Manusia'; percent = 90; }
-    else if (rand <= 97) { role = 'Goblin'; percent = 87; } // Goblin + Elf 87% (kumulatif 90+7)
-    else if (rand <= 99.3) { role = 'Peri'; percent = 30; } // Peri 30% (tapi kita pakai range 97-99.3)
-    else if (rand <= 99.7) { role = 'Hantu'; percent = 5; }
-    else if (rand <= 100) { 
-      // Malaikat atau Iblis 0.7% (dibagi rata)
-      if (Math.random() < 0.5) { role = 'Malaikat'; percent = 0.7; }
-      else { role = 'Iblis'; percent = 0.7; }
-    }
-    // fine tune agar Goblin & Elf masing-masing 87? kita bagi 2
-    if (role === 'Goblin' || role === 'Elf') {
-      // kita set ulang berdasarkan random kedua
-      if (Math.random() < 0.5) role = 'Goblin';
-      else role = 'Elf';
-    }
-    // tapi karena di atas kita cuma assign Goblin, kita random antara Goblin/Elf
-    if (role === 'Goblin') {
-      if (Math.random() < 0.5) role = 'Elf';
-    }
-    // untuk peri, hantu, dll sudah oke
-    playerRole = role;
-    gachaRemaining--;
-    rollCount++;
-    appendMessage(`🎲 Gacha #${rollCount} → **${role}** (persentase ~${percent}%)`, 'player');
-    appendMessage(`Selamat! Peranmu sekarang: ${role}. Sisa gulungan: ${gachaRemaining}`, 'narrator');
-    updateCoinUI();
-    // jika role langka
-    if (role === 'Malaikat' || role === 'Iblis') {
-      appendMessage(`✨ Langka! ${role} muncul!`, 'narrator');
-    }
-  }
-
-  // ========== NPC JUAL BELI (random grade/harga) ==========
-  function npcTrade(npcIndex) {
-    const npcNames = [
-      'Penempa Senjata', 'Pembuat Ramuan', 'Penempa Artefak', 
-      'Pembuat Gulung Sihir', 'Penjinak Hewan Sihir'
-    ];
-    const grades = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythic', 'Ancient'];
-    const gradeWeights = [40, 25, 15, 10, 5, 3, 2]; // random
-    function randomGrade() {
-      let r = Math.random() * 100;
-      let cum = 0;
-      for (let i=0; i<grades.length; i++) {
-        cum += gradeWeights[i];
-        if (r <= cum) return grades[i];
-      }
-      return 'Common';
-    }
-    const grade = randomGrade();
-    // harga random 10 - 500
-    let basePrice = Math.floor(Math.random() * 490 + 10);
-    // multiplier grade
-    const gradeMulti = { 'Common':1, 'Uncommon':1.8, 'Rare':3, 'Epic':6, 'Legendary':12, 'Mythic':25, 'Ancient':45 };
-    let price = Math.floor(basePrice * (gradeMulti[grade] || 1));
-    // random item name
-    const itemPrefix = ['Pedang', 'Tombak', 'Busur', 'Jubah', 'Cincin', 'Botol', 'Gulungan', 'Kristal', 'Tali', 'Palu'];
-    const itemSuffix = ['Api', 'Es', 'Bayangan', 'Cahaya', 'Bumi', 'Angin', 'Naga', 'Feniks', 'Roh', 'Batu'];
-    const itemName = itemPrefix[Math.floor(Math.random() * itemPrefix.length)] + ' ' + 
-                     itemSuffix[Math.floor(Math.random() * itemSuffix.length)];
-
-    // tawarkan ke player
-    appendMessage(`🗡️ ${npcNames[npcIndex]} menawarkan: **${itemName}** [${grade}] — harga ${price} 🪙`, 'narrator');
-    appendMessage(`Ketik /beli ${price} untuk membeli, atau /tolak.`, 'narrator');
-    // simpan state buy
-    window._pendingTrade = { itemName, grade, price, npc: npcNames[npcIndex] };
-  }
-
-  // ========== JOBDESK ==========
-  function showJobdesk() {
-    appendMessage(`📋 Daftar Pekerjaan:`, 'narrator');
-    appendMessage(`⛏️ Penambang · 🏹 Berburu · ⚔️ Membunuh · 🧪 Meracik · 🛡️ Menjaga · 📜 Menyihir`, 'narrator');
-    appendMessage(`Ketik /job <pekerjaan> untuk memulai (simbolis).`, 'narrator');
-  }
-
-  // ========== PARSER PERINTAH ==========
-  function processCommand(input) {
-    const cmd = input.trim();
-    if (cmd === '/gacha') {
-      rollGacha();
-      return true;
-    } else if (cmd === '/jobdesk') {
-      showJobdesk();
-      return true;
-    } else if (cmd.startsWith('/beli ')) {
-      const parts = cmd.split(' ');
-      const price = parseInt(parts[1]);
-      if (!window._pendingTrade) {
-        appendMessage(`Tidak ada tawaran NPC. Cari NPC dulu dengan /npc`, 'narrator');
-        return true;
-      }
-      if (isNaN(price) || price !== window._pendingTrade.price) {
-        appendMessage(`Harga tidak sesuai.`, 'narrator');
-        return true;
-      }
-      if (coin < price) {
-        appendMessage(`Koin tidak cukup! 🪙 ${coin} tersedia.`, 'narrator');
-        return true;
-      }
-      coin -= price;
-      updateCoinUI();
-      const item = window._pendingTrade.itemName;
-      const grade = window._pendingTrade.grade;
-      appendMessage(`✅ Berhasil membeli **${item}** [${grade}] dari ${window._pendingTrade.npc}.`, 'narrator');
-      appendMessage(`Koin tersisa: ${coin} 🪙`, 'narrator');
-      window._pendingTrade = null;
-      return true;
-    } else if (cmd === '/tolak') {
-      if (window._pendingTrade) {
-        appendMessage(`Menolak tawaran dari ${window._pendingTrade.npc}.`, 'narrator');
-        window._pendingTrade = null;
-      } else {
-        appendMessage(`Tidak ada tawaran aktif.`, 'narrator');
-      }
-      return true;
-    } else if (cmd === '/npc') {
-      appendMessage(`Klik titik tiga (⁝) di kanan atas untuk memilih NPC.`, 'narrator');
-      npcModal.classList.add('active');
-      overlay.classList.add('active');
-      return true;
-    } else if (cmd === '/buygacha') {
-      if (coin < 100) {
-        appendMessage(`Koin tidak cukup! Butuh 100 🪙.`, 'narrator');
-        return true;
-      }
-      coin -= 100;
-      gachaRemaining += 1;
-      updateCoinUI();
-      appendMessage(`✅ 1 gulungan peran dibeli! Sisa gulungan: ${gachaRemaining}`, 'narrator');
-      return true;
-    } else if (cmd === '/help') {
-      appendMessage(`📖 Perintah: /gacha, /jobdesk, /npc, /buygacha, /beli <harga>, /tolak, /help`, 'narrator');
-      return true;
-    } else if (cmd.startsWith('/job ')) {
-      const job = cmd.substring(5);
-      appendMessage(`🧑 Pemain memulai pekerjaan: ${job}. (simulasi)`, 'player');
-      appendMessage(`💰 Kamu mendapat 10-30 koin dari pekerjaan.`, 'narrator');
-      const earn = Math.floor(Math.random() * 20) + 10;
-      coin += earn;
-      updateCoinUI();
-      appendMessage(`+${earn} 🪙 Koin. Total: ${coin}`, 'narrator');
-      return true;
-    }
-    return false;
-  }
-
-  // ========== EVENT ==========
-  // send message
-  function sendMessage() {
-    const text = chatInput.value.trim();
-    if (!text) return;
-    // tampilkan di chat
-    appendMessage(text, 'player');
-    chatInput.value = '';
-    // cek command
-    if (text.startsWith('/')) {
-      const handled = processCommand(text);
-      if (!handled) {
-        appendMessage(`Perintah tidak dikenal. Ketik /help untuk bantuan.`, 'narrator');
-      }
-    } else {
-      // narator respon random
-      const replies = ['Hmm, menarik.', 'Lanjutkan, Pemain.', 'Aku mendengarkan.', 'Ceritakan lebih banyak.'];
-      appendMessage(replies[Math.floor(Math.random() * replies.length)], 'narrator');
-    }
-  }
-
-  // NPC modal toggle
-  menuDots.addEventListener('click', function(e) {
-    e.stopPropagation();
-    npcModal.classList.toggle('active');
-    overlay.classList.toggle('active');
-  });
-  overlay.addEventListener('click', function() {
-    npcModal.classList.remove('active');
-    overlay.classList.remove('active');
-  });
-
-  // klik NPC
-  document.querySelectorAll('.npc-item').forEach(el => {
-    el.addEventListener('click', function() {
-      const index = parseInt(this.dataset.npc);
-      npcModal.classList.remove('active');
-      overlay.classList.remove('active');
-      // random trade
-      npcTrade(index);
-    });
-  });
-
-  sendBtn.addEventListener('click', sendMessage);
-  chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-  // init
-  updateCoinUI();
-  welcomeMessage();
-  appendMessage(`🎭 Peran awal: Manusia. Gunakan /gacha untuk mengganti.`, 'narrator');
-  appendMessage(`🎲 Sisa gulungan gratis: ${gachaRemaining}`, 'narrator');
-  appendMessage(`💡 Ketik /help untuk daftar perintah.`, 'narrator');
-})();
+/* style.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+}
+body {
+  background: #0b141a;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+}
+.wa-container {
+  max-width: 420px;
+  width: 100%;
+  background: #111b21;
+  border-radius: 28px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+  overflow: hidden;
+  border: 1px solid #2b3b45;
+  display: flex;
+  flex-direction: column;
+  height: 780px;
+  position: relative;
+}
+.wa-header {
+  background: #1f2c33;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #2b3b45;
+}
+.wa-avatar {
+  width: 40px;
+  height: 40px;
+  background: #2b3b45;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: #d1d7db;
+  border: 1px solid #3b4d59;
+  flex-shrink: 0;
+}
+.wa-title {
+  flex: 1;
+  color: #e9edef;
+  font-weight: 600;
+  font-size: 17px;
+}
+.wa-actions {
+  display: flex;
+  gap: 12px;
+  color: #aebac1;
+  font-size: 20px;
+  cursor: pointer;
+  align-items: center;
+}
+.wa-actions span {
+  padding: 4px 6px;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+.wa-actions span:hover {
+  background: #2b3b45;
+}
+.coin-badge {
+  background: #1f2c33;
+  padding: 4px 12px 4px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid #2b3b45;
+  color: #ffd700;
+  font-weight: 600;
+  font-size: 15px;
+}
+.gems-badge {
+  color: #7b68ee;
+}
+.coin-badge span:first-child {
+  font-size: 18px;
+}
+.coin-badge .coin-amount {
+  margin-left: auto;
+  background: #2b3b45;
+  padding: 2px 14px;
+  border-radius: 30px;
+  color: inherit;
+  font-size: 15px;
+}
+.title-bar {
+  background: #1f2c33;
+  padding: 4px 16px;
+  color: #ffb74d;
+  font-weight: bold;
+  font-size: 14px;
+  border-bottom: 1px solid #2b3b45;
+  text-align: center;
+  letter-spacing: 1px;
+}
+.level-exp-bar {
+  background: #1f2c33;
+  padding: 4px 16px;
+  display: flex;
+  justify-content: space-between;
+  color: #d1d7db;
+  font-size: 13px;
+  border-bottom: 1px solid #2b3b45;
+}
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #0b141a;
+  scroll-behavior: smooth;
+  max-height: 400px;
+}
+.chat-area::-webkit-scrollbar { width: 4px; }
+.chat-area::-webkit-scrollbar-thumb { background: #2b3b45; border-radius: 12px; }
+.message {
+  max-width: 88%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #1f2c33;
+  color: #d1d7db;
+  font-size: 14.5px;
+  line-height: 1.45;
+  word-break: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+.message.narrator {
+  background: #1f2c33;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  border-left: 3px solid #ffb74d;
+}
+.message.player {
+  background: #005c4b;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  color: #e9edef;
+}
+.message .msg-sender {
+  font-weight: 600;
+  font-size: 13px;
+  color: #ffb74d;
+  margin-bottom: 2px;
+}
+.message .msg-sender.player-name { color: #a7d0cd; }
+.message small {
+  opacity: 0.6;
+  font-size: 10px;
+  display: block;
+  margin-top: 4px;
+  text-align: right;
+}
+.wa-input {
+  background: #1f2c33;
+  padding: 8px 12px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid #2b3b45;
+  align-items: center;
+}
+.wa-input input {
+  flex: 1;
+  background: #2b3b45;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 30px;
+  color: #e9edef;
+  font-size: 15px;
+  outline: none;
+}
+.wa-input input::placeholder { color: #85969d; }
+.wa-input button {
+  background: #005c4b;
+  border: none;
+  color: white;
+  font-size: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.wa-input button:hover { background: #007a64; }
+.npc-modal {
+  display: none;
+  position: absolute;
+  top: 60px;
+  right: 12px;
+  background: #1f2c33;
+  border: 1px solid #3b4d59;
+  border-radius: 18px;
+  padding: 12px 8px;
+  min-width: 200px;
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+}
+.npc-modal.active { display: block; }
+.npc-item {
+  padding: 8px 16px;
+  color: #d1d7db;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.1s;
+  border-bottom: 1px solid #2b3b45;
+}
+.npc-item:last-child { border-bottom: none; }
+.npc-item:hover { background: #2b3b45; }
+.npc-item span:first-child { font-size: 18px; }
+.overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 5;
+  display: none;
+}
+.overlay.active { display: block; }
+.status-modal {
+  display: none;
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #1f2c33;
+  border: 2px solid #3b4d59;
+  border-radius: 24px;
+  padding: 24px;
+  z-index: 20;
+  min-width: 260px;
+  color: #d1d7db;
+}
+.status-modal.active { display: block; }
+.status-content h3 { color: #ffb74d; margin-bottom: 16px; text-align: center; }
+.status-content p { margin: 8px 0; font-size: 15px; }
+.status-content button {
+  margin-top: 16px;
+  background: #005c4b;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 30px;
+  width: 100%;
+  cursor: pointer;
+  font-weight: bold;
+}
+.title-shop-item {
+  background: #2b3b45;
+  margin: 6px 0;
+  padding: 8px 12px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: 0.1s;
+  text-align: center;
+}
+.title-shop-item:hover { background: #3b4d59; }
+@media (max-width: 480px) {
+  .wa-container { height: 95vh; border-radius: 20px; }
+}
