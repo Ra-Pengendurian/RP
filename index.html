@@ -4,12 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>⚔️ MMORPG Fantasy · WA Style</title>
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="wa-container" id="app">
-  <!-- header -->
+  <!-- Header -->
   <div class="wa-header">
     <div class="wa-avatar">⚔️</div>
     <div class="wa-title">Fantasy Guild</div>
@@ -18,33 +17,73 @@
       <span id="menuDots" style="font-weight:bold;">⁝</span>
     </div>
   </div>
-  <!-- coin badge -->
+
+  <!-- Coin & Gems -->
   <div class="coin-badge">
     <span>🪙</span> Koin Emas <span class="coin-amount" id="coinDisplay">100</span>
   </div>
+  <div class="coin-badge gems-badge">
+    <span>💎</span> Gems <span class="coin-amount" id="gemsDisplay">100</span>
+  </div>
 
-  <!-- chat messages -->
+  <!-- Gelar -->
+  <div class="title-bar" id="titleBar">Visitor</div>
+
+  <!-- Level & EXP -->
+  <div class="level-exp-bar">
+    <span>Level <span id="levelDisplay">1</span></span>
+    <span>EXP <span id="expDisplay">0</span> / <span id="expNextDisplay">100</span></span>
+  </div>
+
+  <!-- Chat Area -->
   <div class="chat-area" id="chatArea"></div>
 
-  <!-- modal NPC (titik tiga) -->
+  <!-- Modal NPC (titik tiga) -->
   <div class="npc-modal" id="npcModal">
     <div class="npc-item" data-npc="0"><span>🔨</span> Penempa Senjata</div>
     <div class="npc-item" data-npc="1"><span>🧪</span> Pembuat Ramuan</div>
     <div class="npc-item" data-npc="2"><span>🏹</span> Penempa Artefak</div>
     <div class="npc-item" data-npc="3"><span>📜</span> Pembuat Gulung Sihir</div>
     <div class="npc-item" data-npc="4"><span>🐉</span> Penjinak Hewan Sihir</div>
+    <div class="npc-item" id="statusBtn"><span>📊</span> Status Windows</div>
+    <div class="npc-item" id="titleShopBtn"><span>🏅</span> Gelar Shop</div>
   </div>
 
-  <!-- input -->
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Status Modal -->
+  <div class="status-modal" id="statusModal">
+    <div class="status-content">
+      <h3>📊 Status Pemain</h3>
+      <p>💪 Kekuatan: <span id="statStr">10</span></p>
+      <p>🛡️ Ketahanan: <span id="statDef">10</span></p>
+      <p>💨 Kecepatan: <span id="statSpd">10</span></p>
+      <p>🌀 Kelincahan: <span id="statAgi">10</span></p>
+      <p>🍀 Kehokian: <span id="statLuk">10</span></p>
+      <button id="closeStatus">Tutup</button>
+    </div>
+  </div>
+
+  <!-- Title Shop Modal -->
+  <div class="status-modal" id="titleShopModal">
+    <div class="status-content">
+      <h3>🏅 Beli Gelar</h3>
+      <div class="title-shop-item" data-title="Pro" data-price="50">Pro - 50 Gems</div>
+      <div class="title-shop-item" data-title="Expert" data-price="150">Expert - 150 Gems</div>
+      <div class="title-shop-item" data-title="Master" data-price="300">Master - 300 Gems</div>
+      <div class="title-shop-item" data-title="Sage" data-price="500">Sage - 500 Gems</div>
+      <div class="title-shop-item" data-title="Visitor" data-price="0">Visitor - Gratis</div>
+      <button id="closeTitleShop">Tutup</button>
+    </div>
+  </div>
+
+  <!-- Input -->
   <div class="wa-input">
     <input type="text" id="chatInput" placeholder="Ketik pesan..." />
     <button id="sendBtn">➤</button>
   </div>
 </div>
-<!-- overlay -->
-<div class="overlay" id="overlay"></div>
-
-<!-- JavaScript -->
 <script src="script.js"></script>
 </body>
 </html>
