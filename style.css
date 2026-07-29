@@ -13,7 +13,6 @@ body {
   align-items: center;
   padding: 12px;
 }
-/* WA chat container */
 .wa-container {
   max-width: 420px;
   width: 100%;
@@ -24,10 +23,9 @@ body {
   border: 1px solid #2b3b45;
   display: flex;
   flex-direction: column;
-  height: 760px;
+  height: 780px;
   position: relative;
 }
-/* header WA */
 .wa-header {
   background: #1f2c33;
   padding: 10px 16px;
@@ -55,7 +53,6 @@ body {
   color: #e9edef;
   font-weight: 600;
   font-size: 17px;
-  letter-spacing: 0.3px;
 }
 .wa-actions {
   display: flex;
@@ -73,10 +70,9 @@ body {
 .wa-actions span:hover {
   background: #2b3b45;
 }
-/* badge coin di bawah avatar */
 .coin-badge {
   background: #1f2c33;
-  padding: 6px 12px 6px 16px;
+  padding: 4px 12px 4px 16px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -84,6 +80,9 @@ body {
   color: #ffd700;
   font-weight: 600;
   font-size: 15px;
+}
+.gems-badge {
+  color: #7b68ee;
 }
 .coin-badge span:first-child {
   font-size: 18px;
@@ -93,10 +92,28 @@ body {
   background: #2b3b45;
   padding: 2px 14px;
   border-radius: 30px;
-  color: #ffd700;
+  color: inherit;
   font-size: 15px;
 }
-/* chat area */
+.title-bar {
+  background: #1f2c33;
+  padding: 4px 16px;
+  color: #ffb74d;
+  font-weight: bold;
+  font-size: 14px;
+  border-bottom: 1px solid #2b3b45;
+  text-align: center;
+  letter-spacing: 1px;
+}
+.level-exp-bar {
+  background: #1f2c33;
+  padding: 4px 16px;
+  display: flex;
+  justify-content: space-between;
+  color: #d1d7db;
+  font-size: 13px;
+  border-bottom: 1px solid #2b3b45;
+}
 .chat-area {
   flex: 1;
   overflow-y: auto;
@@ -106,15 +123,10 @@ body {
   gap: 10px;
   background: #0b141a;
   scroll-behavior: smooth;
-  max-height: 500px;
+  max-height: 400px;
 }
-.chat-area::-webkit-scrollbar {
-  width: 4px;
-}
-.chat-area::-webkit-scrollbar-thumb {
-  background: #2b3b45;
-  border-radius: 12px;
-}
+.chat-area::-webkit-scrollbar { width: 4px; }
+.chat-area::-webkit-scrollbar-thumb { background: #2b3b45; border-radius: 12px; }
 .message {
   max-width: 88%;
   padding: 8px 12px;
@@ -144,9 +156,7 @@ body {
   color: #ffb74d;
   margin-bottom: 2px;
 }
-.message .msg-sender.player-name {
-  color: #a7d0cd;
-}
+.message .msg-sender.player-name { color: #a7d0cd; }
 .message small {
   opacity: 0.6;
   font-size: 10px;
@@ -154,17 +164,6 @@ body {
   margin-top: 4px;
   text-align: right;
 }
-.gacha-result {
-  background: #1f2c33;
-  padding: 6px 12px;
-  border-radius: 20px;
-  align-self: center;
-  font-size: 13px;
-  border: 1px solid #3b4d59;
-  color: #d1d7db;
-  max-width: 95%;
-}
-/* input area */
 .wa-input {
   background: #1f2c33;
   padding: 8px 12px;
@@ -183,9 +182,7 @@ body {
   font-size: 15px;
   outline: none;
 }
-.wa-input input::placeholder {
-  color: #85969d;
-}
+.wa-input input::placeholder { color: #85969d; }
 .wa-input button {
   background: #005c4b;
   border: none;
@@ -200,10 +197,7 @@ body {
   cursor: pointer;
   transition: 0.15s;
 }
-.wa-input button:hover {
-  background: #007a64;
-}
-/* NPC modal ( tiga titik ) */
+.wa-input button:hover { background: #007a64; }
 .npc-modal {
   display: none;
   position: absolute;
@@ -217,9 +211,7 @@ body {
   z-index: 10;
   box-shadow: 0 8px 24px rgba(0,0,0,0.8);
 }
-.npc-modal.active {
-  display: block;
-}
+.npc-modal.active { display: block; }
 .npc-item {
   padding: 8px 16px;
   color: #d1d7db;
@@ -232,16 +224,9 @@ body {
   transition: 0.1s;
   border-bottom: 1px solid #2b3b45;
 }
-.npc-item:last-child {
-  border-bottom: none;
-}
-.npc-item:hover {
-  background: #2b3b45;
-}
-.npc-item span:first-child {
-  font-size: 18px;
-}
-/* overlay */
+.npc-item:last-child { border-bottom: none; }
+.npc-item:hover { background: #2b3b45; }
+.npc-item span:first-child { font-size: 18px; }
 .overlay {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -249,10 +234,44 @@ body {
   z-index: 5;
   display: none;
 }
-.overlay.active {
-  display: block;
+.overlay.active { display: block; }
+.status-modal {
+  display: none;
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #1f2c33;
+  border: 2px solid #3b4d59;
+  border-radius: 24px;
+  padding: 24px;
+  z-index: 20;
+  min-width: 260px;
+  color: #d1d7db;
 }
-/* responsif */
+.status-modal.active { display: block; }
+.status-content h3 { color: #ffb74d; margin-bottom: 16px; text-align: center; }
+.status-content p { margin: 8px 0; font-size: 15px; }
+.status-content button {
+  margin-top: 16px;
+  background: #005c4b;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 30px;
+  width: 100%;
+  cursor: pointer;
+  font-weight: bold;
+}
+.title-shop-item {
+  background: #2b3b45;
+  margin: 6px 0;
+  padding: 8px 12px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: 0.1s;
+  text-align: center;
+}
+.title-shop-item:hover { background: #3b4d59; }
 @media (max-width: 480px) {
   .wa-container { height: 95vh; border-radius: 20px; }
-}
+  }
