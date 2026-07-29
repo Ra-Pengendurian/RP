@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>⚔️ MMORPG Fantasy · WA Style</title>
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wa-container" id="app">
+  <!-- header -->
+  <div class="wa-header">
+    <div class="wa-avatar">⚔️</div>
+    <div class="wa-title">Fantasy Guild</div>
+    <div class="wa-actions">
+      <span>🔍</span>
+      <span id="menuDots" style="font-weight:bold;">⁝</span>
+    </div>
+  </div>
+  <!-- coin badge -->
+  <div class="coin-badge">
+    <span>🪙</span> Koin Emas <span class="coin-amount" id="coinDisplay">100</span>
+  </div>
+
+  <!-- chat messages -->
+  <div class="chat-area" id="chatArea"></div>
+
+  <!-- modal NPC (titik tiga) -->
+  <div class="npc-modal" id="npcModal">
+    <div class="npc-item" data-npc="0"><span>🔨</span> Penempa Senjata</div>
+    <div class="npc-item" data-npc="1"><span>🧪</span> Pembuat Ramuan</div>
+    <div class="npc-item" data-npc="2"><span>🏹</span> Penempa Artefak</div>
+    <div class="npc-item" data-npc="3"><span>📜</span> Pembuat Gulung Sihir</div>
+    <div class="npc-item" data-npc="4"><span>🐉</span> Penjinak Hewan Sihir</div>
+  </div>
+
+  <!-- input -->
+  <div class="wa-input">
+    <input type="text" id="chatInput" placeholder="Ketik pesan..." />
+    <button id="sendBtn">➤</button>
+  </div>
+</div>
+<!-- overlay -->
+<div class="overlay" id="overlay"></div>
+
+<!-- JavaScript -->
+<script src="script.js"></script>
+</body>
+</html>
