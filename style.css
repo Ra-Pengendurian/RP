@@ -105,6 +105,9 @@ body {
   text-align: center;
   letter-spacing: 1px;
 }
+.title-bar.hidden {
+  display: none;
+}
 .level-exp-bar {
   background: #1f2c33;
   padding: 4px 16px;
@@ -274,4 +277,4 @@ body {
 .title-shop-item:hover { background: #3b4d59; }
 @media (max-width: 480px) {
   .wa-container { height: 95vh; border-radius: 20px; }
-  }
+    }
