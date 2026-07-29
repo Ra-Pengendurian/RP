@@ -9,12 +9,64 @@
   let level = 1;
   let exp = 0;
   let expNext = 100;
-  let title = ''; // Kosong di awal
+  
+  // Base stats (tanpa bonus gelar)
+  let baseStats = { str: 10, def: 10, spd: 10, agi: 10, luk: 10 };
+  
+  // Data gelar
+  const titleData = {
+    Visitor: {
+      price: 0,
+      statBonus: { str: 0, def: 0, spd: 0, agi: 0, luk: 0 },
+      coinBonus: 0,
+      gemBonus: 0,
+      artifact: null,
+      artifactGrade: null,
+      beast: null
+    },
+    Pro: {
+      price: 50,
+      statBonus: { str: 2, def: 2, spd: 2, agi: 2, luk: 2 },
+      coinBonus: 50,
+      gemBonus: 5,
+      artifact: 'Pedang Pro',
+      artifactGrade: 'Rare',
+      beast: null
+    },
+    Expert: {
+      price: 150,
+      statBonus: { str: 4, def: 4, spd: 4, agi: 4, luk: 4 },
+      coinBonus: 100,
+      gemBonus: 10,
+      artifact: 'Jubah Expert',
+      artifactGrade: 'Epic',
+      beast: null
+    },
+    Master: {
+      price: 300,
+      statBonus: { str: 6, def: 6, spd: 6, agi: 6, luk: 6 },
+      coinBonus: 150,
+      gemBonus: 15,
+      artifact: 'Cincin Master',
+      artifactGrade: 'Legendary',
+      beast: null
+    },
+    Sage: {
+      price: 500,
+      statBonus: { str: 8, def: 8, spd: 8, agi: 8, luk: 8 },
+      coinBonus: 200,
+      gemBonus: 20,
+      artifact: 'Mahkota Sage',
+      artifactGrade: 'Mythic',
+      beast: '🐉 Naga China'
+    }
+  };
 
-  // Stats
-  let stats = { str: 10, def: 10, spd: 10, agi: 10, luk: 10 };
+  // State gelar
+  let purchasedTitles = []; // daftar gelar yang sudah dibeli
+  let currentTitle = null;  // gelar yang sedang aktif (null = tidak ada)
 
-  // Elemen
+  // Elemen DOM
   const chatArea = document.getElementById('chatArea');
   const coinDisplay = document.getElementById('coinDisplay');
   const gemsDisplay = document.getElementById('gemsDisplay');
@@ -30,22 +82,40 @@
   const statusModal = document.getElementById('statusModal');
   const titleShopModal = document.getElementById('titleShopModal');
 
-  // Helper update UI
+  // Helper: dapatkan bonus stat dari gelar
+  function getTitleBonus(titleName) {
+    return titleData[titleName] ? titleData[titleName].statBonus : { str: 0, def: 0, spd: 0, agi: 0, luk: 0 };
+  }
+
+  // Helper: hitung stat efektif = baseStats + bonus gelar (jika ada)
+  function getEffectiveStats() {
+    const bonus = currentTitle ? getTitleBonus(currentTitle) : { str: 0, def: 0, spd: 0, agi: 0, luk: 0 };
+    return {
+      str: baseStats.str + bonus.str,
+      def: baseStats.def + bonus.def,
+      spd: baseStats.spd + bonus.spd,
+      agi: baseStats.agi + bonus.agi,
+      luk: baseStats.luk + bonus.luk
+    };
+  }
+
+  // Update UI
   function updateUI() {
     coinDisplay.textContent = coin;
     gemsDisplay.textContent = gems;
     levelDisplay.textContent = level;
     expDisplay.textContent = exp;
     expNextDisplay.textContent = expNext;
-    
-    // Tampilkan gelar hanya jika ada
-    if (title && title !== '') {
+
+    // Tampilkan gelar jika ada
+    if (currentTitle) {
       titleBar.classList.remove('hidden');
-      titleBar.textContent = title;
+      titleBar.textContent = currentTitle;
     } else {
       titleBar.classList.add('hidden');
     }
-    
+
+    const stats = getEffectiveStats();
     document.getElementById('statStr').textContent = stats.str;
     document.getElementById('statDef').textContent = stats.def;
     document.getElementById('statSpd').textContent = stats.spd;
@@ -79,11 +149,11 @@
       exp -= expNext;
       level++;
       expNext = Math.floor(expNext * 1.5) + 20;
-      stats.str += 2;
-      stats.def += 2;
-      stats.spd += 2;
-      stats.agi += 2;
-      stats.luk += 1;
+      baseStats.str += 2;
+      baseStats.def += 2;
+      baseStats.spd += 2;
+      baseStats.agi += 2;
+      baseStats.luk += 1;
       appendMessage(`🎉 Level UP! Sekarang Level ${level}. Stats meningkat!`, 'narrator');
       updateUI();
     }
@@ -230,6 +300,60 @@
     return false;
   }
 
+  // ========== FUNGSI BELI GELAR ==========
+  function buyTitle(titleName) {
+    const data = titleData[titleName];
+    if (!data) return;
+
+    // Jika gelar sudah dibeli, cukup aktifkan (tanpa biaya)
+    if (purchasedTitles.includes(titleName)) {
+      currentTitle = titleName;
+      updateUI();
+      appendMessage(`🏅 Gelar diubah menjadi: ${titleName}`);
+      titleShopModal.classList.remove('active');
+      overlay.classList.remove('active');
+      return;
+    }
+
+    // Cek kecukupan Gems
+    if (gems < data.price) {
+      appendMessage(`💎 Gems tidak cukup! Butuh ${data.price} Gems.`, 'narrator');
+      return;
+    }
+
+    // Bayar harga
+    gems -= data.price;
+    purchasedTitles.push(titleName);
+    currentTitle = titleName;
+
+    // Berikan bonus Coin & Gems
+    if (data.coinBonus > 0) {
+      coin += data.coinBonus;
+      appendMessage(`🪙 Mendapat bonus ${data.coinBonus} Koin!`, 'narrator');
+    }
+    if (data.gemBonus > 0) {
+      gems += data.gemBonus;
+      appendMessage(`💎 Mendapat bonus ${data.gemBonus} Gems!`, 'narrator');
+    }
+
+    // Berikan artefak (jika ada)
+    if (data.artifact) {
+      appendMessage(`🎁 Mendapatkan artefak: **${data.artifact}** [${data.artifactGrade}]`, 'narrator');
+    }
+
+    // Berikan hewan kuno (jika ada)
+    if (data.beast) {
+      appendMessage(`🐉 Mendapatkan hewan kuno: ${data.beast}`, 'narrator');
+    }
+
+    appendMessage(`🏅 Gelar **${titleName}** berhasil diperoleh!`, 'narrator');
+    updateUI();
+
+    // Tutup modal
+    titleShopModal.classList.remove('active');
+    overlay.classList.remove('active');
+  }
+
   // ========== EVENT ==========
   function sendMessage() {
     const text = chatInput.value.trim();
@@ -290,18 +414,11 @@
     overlay.classList.remove('active');
   });
 
-  // Beli gelar
+  // Event listener untuk item gelar di shop
   document.querySelectorAll('.title-shop-item').forEach(el => {
     el.addEventListener('click', function() {
       const titleName = this.dataset.title;
-      const price = parseInt(this.dataset.price);
-      if (gems < price) { appendMessage(`💎 Gems tidak cukup!`, 'narrator'); return; }
-      gems -= price;
-      title = titleName;
-      appendMessage(`🏅 Gelar berubah menjadi: ${titleName}`, 'narrator');
-      updateUI();
-      titleShopModal.classList.remove('active');
-      overlay.classList.remove('active');
+      buyTitle(titleName);
     });
   });
 
@@ -314,4 +431,5 @@
   appendMessage(`💡 /help untuk daftar perintah.`, 'narrator');
   appendMessage(`🎲 Sisa gacha gratis: ${gachaRemaining}`, 'narrator');
   appendMessage(`🪙 ${coin} Koin, 💎 ${gems} Gems, Level ${level}`, 'narrator');
+  appendMessage(`🏅 Kamu belum memiliki gelar. Kunjungi Beli Gelar untuk mendapatkannya!`, 'narrator');
 })();
