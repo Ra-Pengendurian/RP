@@ -10,7 +10,7 @@
   let level = 1;
   let exp = 0;
   let expNext = 100;
-  let title = 'Visitor';
+  let title = ''; // Kosong di awal
 
   // Stats
   let stats = { str: 10, def: 10, spd: 10, agi: 10, luk: 10 };
@@ -38,7 +38,15 @@
     levelDisplay.textContent = level;
     expDisplay.textContent = exp;
     expNextDisplay.textContent = expNext;
-    titleBar.textContent = title;
+    
+    // Tampilkan gelar hanya jika ada
+    if (title && title !== '') {
+      titleBar.style.display = 'block';
+      titleBar.textContent = title;
+    } else {
+      titleBar.style.display = 'none';
+    }
+    
     document.getElementById('statStr').textContent = stats.str;
     document.getElementById('statDef').textContent = stats.def;
     document.getElementById('statSpd').textContent = stats.spd;
@@ -72,7 +80,6 @@
       exp -= expNext;
       level++;
       expNext = Math.floor(expNext * 1.5) + 20;
-      // Naikkan stats sedikit
       stats.str += 2;
       stats.def += 2;
       stats.spd += 2;
@@ -211,7 +218,6 @@
       const expEarn = Math.floor(Math.random() * 20) + 5;
       coin += coinEarn; gems += gemsEarn; addExp(expEarn);
       appendMessage(`💰 +${coinEarn} Koin, 💎 +${gemsEarn} Gems, ⭐ +${expEarn} EXP`, 'narrator');
-      // Cek hewan kuno jika job petualang
       if (job.toLowerCase().includes('petualang')) {
         const found = huntAncient();
         if (!found) appendMessage(`Tidak menemukan hewan kuno.`, 'narrator');
